@@ -39,17 +39,17 @@ export default {
                                 name: 'title',
                                 widget: 'string',
                             },
-                            {
-                                label: 'Select',
-                                name: 'select',
-                                widget: 'select',
-                                options: [
-                                    { label: 'Option 1', value: 'opt-1' },
-                                    { label: 'Option 2', value: 'opt-2' },
-                                    { label: 'Option 3', value: 'opt-3' },
-                                    { label: 'Option 4', value: 'opt-4' },
-                                ]
-                            },
+                            // {
+                            //     label: 'Select',
+                            //     name: 'select',
+                            //     widget: 'select',
+                            //     options: [
+                            //         { label: 'Option 1', value: 'opt-1' },
+                            //         { label: 'Option 2', value: 'opt-2' },
+                            //         { label: 'Option 3', value: 'opt-3' },
+                            //         { label: 'Option 4', value: 'opt-4' },
+                            //     ]
+                            // },
                             {
                                 label: 'Select but external',
                                 name: 'select-external',
@@ -58,14 +58,14 @@ export default {
                                 value_field: 'id',
                                 display_field: 'name',
                             },
-                            {
-                                label: 'Json',
-                                name: 'yes',
-                                widget: 'create-select',
-                                url: 'https://jsonplaceholder.typicode.com/users',
-                                attribute: 'name',
-                                mode: 'json',
-                            },
+                            // {
+                            //     label: 'Json',
+                            //     name: 'yes',
+                            //     widget: 'create-select',
+                            //     url: 'https://jsonplaceholder.typicode.com/users',
+                            //     attribute: 'name',
+                            //     mode: 'json',
+                            // },
                         ]
                     }
                 ]

@@ -29,14 +29,14 @@
             // import cms from 'netlify-cms-app'
             import config from './sample-config.js'
             import { CreatableSelectControl, CreatableSelectPreview } from 'netlify-cms-widget-create-select'
-            import { controlComponent as control } from '../lib'
+            import { controlComponent as control, schema } from '../lib'
 
             // console.log(control);
             console.log(CreatableSelectControl);
 
             CMS.init(config)
             CMS.registerWidget('create-select', CreatableSelectControl, CreatableSelectPreview);
-            CMS.registerWidget('select-ext', control)
+            CMS.registerWidget('select-ext', control, schema)
             // CMS.registerWidget('create-select', CreatableSelectControl, CreatableSelectPreview);
             // CMS.registerWidget('create-select', window.CreatableSelectControl, window.CreatableSelectPreview)
         </script>

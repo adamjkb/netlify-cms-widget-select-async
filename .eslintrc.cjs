@@ -16,6 +16,14 @@ module.exports = {
         es2017: true,
         node: true
     },
+    plugins: [
+        'react'
+    ],
+    settings: {
+        'react': {
+            'version': 'detect'
+        }
+    },
     rules: {
         indent: ['error', 4],
         'no-unused-vars': ['warn', { 'args': 'none' }],
