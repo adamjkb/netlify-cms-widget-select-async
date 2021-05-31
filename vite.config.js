@@ -1,7 +1,7 @@
 export default {
     root: './example',
     build: {
-        minify: false,
+        minify: 'terser',
         lib: {
             entry: '../lib/index.js',
             name: 'AsyncSelectWidget',
