@@ -1,6 +1,6 @@
 {
   "name": "@adamjkb/netlify-cms-widget-select-async",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "NetlifyCMS select widget from external resources",
   "files": ["dist"],
   "main": "./dist/index.umd.js",
