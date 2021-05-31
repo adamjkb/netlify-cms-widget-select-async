@@ -57,6 +57,25 @@ export default {
                                 url: 'https://jsonplaceholder.typicode.com/users',
                                 value_field: 'id',
                                 display_field: 'name',
+                                cache_options: true, // react-select option, caches already fetched result to a specific term
+                                fetch_options: {
+                                    // headers: 'xfie',
+                                    // method: 'method',
+                                    // body: 'null',
+                                    // @{type} function
+                                    // {params}
+                                    /**
+                                     *  A function creating the fetch params object
+                                     *  @param {Object} opts - Object composed of default or set values
+                                     *  @param {string} opts.term - Search term entered to filter results from input field
+                                     *  @param {string} opts.url - URL
+                                     *  @param {string} opts.headers - Headers | default: {}
+                                     *  @param {string} opts.body - Body
+                                     *  @param {string} opts.method - Method | default: 'GET'
+                                     *  @returns {Object} object of url and options
+                                     */
+                                    params_function: ({ term, url, ...rest }) => ({ url: `${url}?term=${term}`, options: rest }) // returns a fetch object
+                                }
                             },
                             // {
                             //     label: 'Json',

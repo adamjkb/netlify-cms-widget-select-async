@@ -3,44 +3,21 @@
     <head>
         <meta charset='utf-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-        <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
         <title>Content Manager</title>
+        <script src='https://identity.netlify.com/v1/netlify-identity-widget.js'></script>
     </head>
-    <body style="background:#f4f4f4;">
+    <body>
         <script>
             window.CMS_MANUAL_INIT = true
         </script>
         <script src='https://unpkg.com/netlify-cms/dist/netlify-cms.js'></script>
-        <script src='https://identity.netlify.com/v1/netlify-identity-widget.js'></script>
-        <script src="/dist/netlify-cms-widget-select-external.umd.js"></script>
-
-        <!-- <script src="https://unpkg.com/react/umd/react.production.min.js"></script> -->
-        <!-- <script src="https://unpkg.com/@pake/react-color@3.0.0/lib/umd/index.js"></script> -->
-        <!-- <script src="https://unpkg.com/netlify-cms-widget-color@3.0.1/dist/umd/color.min.js"></script> -->
-        <!-- <script src="https://unpkg.com/netlify-cms-widget-select@2.8.2/dist/netlify-cms-widget-select.js"></script> -->
-
-        <!-- <script src="https://unpkg.com/netlify-cms-widget-create-select@^1.1.0"></script> -->
-
-        <script>
-
-        </script>
 
         <script type="module">
-            // import cms from 'netlify-cms-app'
             import config from './sample-config.js'
-            import { CreatableSelectControl, CreatableSelectPreview } from 'netlify-cms-widget-create-select'
-            import { controlComponent as control, schema } from '../lib'
-
-            // console.log(control);
-            console.log(CreatableSelectControl);
+            import { Widget as SelectExternalWidget } from '../lib'
 
             CMS.init(config)
-            CMS.registerWidget('create-select', CreatableSelectControl, CreatableSelectPreview);
-            CMS.registerWidget('select-ext', control, schema)
-            // CMS.registerWidget('create-select', CreatableSelectControl, CreatableSelectPreview);
-            // CMS.registerWidget('create-select', window.CreatableSelectControl, window.CreatableSelectPreview)
+            CMS.registerWidget(SelectExternalWidget)
         </script>
-        <!-- <script src="/admin/config.js"></script> -->
-        <!-- <script src="/admin/preview.js" type="module"></script> -->
     </body>
 </html>

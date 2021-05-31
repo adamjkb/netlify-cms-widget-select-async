@@ -4,8 +4,23 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import AsyncSelect from 'react-select/async'
 import { find, isEmpty, last, debounce } from 'lodash'
 import { List, Map, fromJS } from 'immutable'
-import { reactSelectStyles } from 'netlify-cms-ui-default/dist/netlify-cms-ui-default.js'
+import { reactSelectStyles } from 'netlify-cms-ui-default/dist/esm/styles'
 import fuzzy from 'fuzzy'
+
+
+const fieldDefaults = {
+    value_field: 'value',
+    label_field: 'label',
+    multiple: false,
+    required: true,
+    cache_options: false,
+    refetch_url: true,
+    fetch_options: {
+        headers: {},
+        method: 'GET',
+        body: undefined
+    }
+}
 
 function optionToString(option) {
     return option && option.value ? option.value : ''
@@ -19,7 +34,6 @@ function convertToOption(raw) {
 }
 
 function getSelectedValue({ value, options, isMultiple }) {
-    console.log(value, options, isMultiple);
     if (isMultiple) {
         const selectedOptions = List.isList(value) ? value.toJS() : value
 
@@ -32,7 +46,6 @@ function getSelectedValue({ value, options, isMultiple }) {
             .filter(Boolean)
             .map(convertToOption)
     } else {
-        console.log(find(options, ['value', value]));
         return find(options, ['value', value]) || null
     }
 }
@@ -42,32 +55,95 @@ export class Control extends React.Component {
     constructor(props) {
         super(props)
         this.allOptions = ''
-        // this.state = {
-        //     allOptions: []
-        // }
-        this.loadOptions = this.loadOptions.bind(this)
+        this.state = {
+            initialFetch: true,
+            cachedOptions: null
+        }
+
+        this.loadOptions = debounce(this.loadOptions.bind(this), 500)
         this.getOptions = this.getOptions.bind(this)
         this.handleChange = this.handleChange.bind(this)
-        this.parseHitOptions = debounce(this.parseHitOptions.bind(this), 500)
+    }
+
+    async fetchUrl({ term }) {
+        const { field } = this.props
+        const url = field.get('url')
+        const refetchUrl = field.get('refetch_url', fieldDefaults.refetch_url)
+
+        const method = field.getIn(['fetch_options','method'], fieldDefaults.fetch_options.method)
+        const headers = field.getIn(['fetch_options','headers'], fieldDefaults.fetch_options.headers)
+        const body = field.getIn(['fetch_options','body'], fieldDefaults.fetch_options.body)
+        const paramsFunction = field.getIn(['fetch_options', 'params_function'])
+
+        let fetchParams = {}
+
+        if (paramsFunction && typeof paramsFunction === 'function') {
+            // create temporary variable to check whether it returns object
+            const paramsFunctionObject = paramsFunction({
+                term,
+                url,
+                method,
+                headers,
+                refetchUrl
+            })
+            if (
+                paramsFunctionObject &&
+                typeof paramsFunctionObject === 'object' &&
+                paramsFunctionObject.url
+            ) {
+                fetchParams = paramsFunctionObject
+            } else {
+                console.error('\'params_function\' does not return a valid object. Please check your config file.' + '\n' + 'Received object: ' + JSON.stringify(paramsFunctionObject) + '\n' + 'Function: ' + paramsFunction)
+            }
+        } else {
+            fetchParams = {
+                url,
+                options: {
+                    method,
+                    headers,
+                    body
+                }
+            }
+        }
+
+
+
+
+        /**
+         *  If options are cached and refetch_url is set to false skip calling
+         *  external url on each new typed term
+         */
+        if (!this.state.initialFetch && !refetchUrl && this.state.cachedOptions) {
+            return this.state.cachedOptions
+        }
+
+        try {
+            const res = await fetch(fetchParams.url, fetchParams.options)
+                .then(data => data.json())
+                .then(json => fromJS(json))
+
+            if (!refetchUrl) {
+                await this.setState({
+                    cachedOptions: res,
+                    initialFetch: false
+                })
+            }
+
+            return res
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     async getOptions(term) {
         const { field } = this.props
-        const valueField = field.get('value_field')
-        const displayField = field.get('display_field') || valueField
+        const valueField = field.get('value_field', fieldDefaults.value_field)
+        const displayField = field.get('display_field', fieldDefaults.display_field)
         const searchField = field.get('search_field') || displayField
         const filterFunction = field.get('filter')
-        const url = field.get('url')
-        const method = field.get('method') || 'GET'
         const dataKey = field.get('data_key')
-        const headers = field.get('headers') || {}
 
-        const res = await fetch(url, {
-            method,
-            headers,
-        })
-            .then(data => data.json())
-            .then(json => fromJS(json))
+        const res = await this.fetchUrl({ term })
 
         let mappedData = res
 
@@ -110,7 +186,6 @@ export class Control extends React.Component {
     }
 
     handleChange(selectedOption) {
-        console.log(selectedOption)
         const { onChange, field } = this.props
         let value
 
@@ -134,38 +209,33 @@ export class Control extends React.Component {
         }
     }
 
-    parseHitOptions(hits) {
-        const { field } = this.props
-        const valueField = field.get('value_field')
-        const displayField = field.get('display_fields') || field.get('value_field')
-
-        return hits.map(hit => ({
-            data: hit.data,
-            value: hit.data[valueField],
-            label: List.isList(displayField)
-                ? displayField
-                    .toJS()
-                    .map(key => hit.data[key])
-                    .join(' ')
-                : hit.data[displayField],
-        }))
-    }
+    // parseHitOptions(hits) {
+    //     const { field } = this.props
+    //     const valueField = field.get('value_field')
+    //     const displayField = field.get('display_fields') || field.get('value_field')
+    //
+    //     return hits.map(hit => ({
+    //         data: hit.data,
+    //         value: hit.data[valueField],
+    //         label: List.isList(displayField)
+    //             ? displayField
+    //                 .toJS()
+    //                 .map(key => hit.data[key])
+    //                 .join(' ')
+    //             : hit.data[displayField],
+    //     }))
+    // }
 
     loadOptions(term, callback) {
         this.getOptions(term).then(options => {
-            console.log(options)
             if (!this.allOptions && !term) {
                 this.allOptions = options
                 // this.setState({allOptions: options})
             }
 
-            // TODO: Pagination
-            // For now we return entire result set, assuming this is a rest or
-            // graphql endpoint that can paginate for us.
-
             callback(options)
             // Refresh state to trigger a re-render.
-            this.setState({ ...this.state })
+            // this.setState({ ...this.state })
         })
     }
 
@@ -180,8 +250,8 @@ export class Control extends React.Component {
             setInactiveStyle,
         } = this.props
 
-        const isMultiple = field.get('multiple', false)
-        const isClearable = !field.get('required', true) || isMultiple
+        const isMultiple = field.get('multiple', fieldDefaults.multiple)
+        const isClearable = !field.get('required', fieldDefaults.required) || isMultiple
         const options = this.allOptions
 
         const selectedValue = getSelectedValue({
@@ -195,11 +265,13 @@ export class Control extends React.Component {
             <AsyncSelect
                 defaultOptions
                 className={classNameWrapper}
+                cacheOptions={true}
                 inputId={forID}
                 isClearable={isClearable}
                 isMulti={isMultiple}
                 loadOptions={this.loadOptions}
                 onChange={this.handleChange}
+                isSearchable
                 onBlur={setInactiveStyle}
                 onFocus={setActiveStyle}
                 placeholder=""
