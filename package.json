@@ -2,19 +2,21 @@
   "name": "@adamjkb/netlify-cms-widget-select-async",
   "version": "0.0.2",
   "description": "NetlifyCMS select widget from external resources",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.umd.js",
-    "module": "./dist/index.es.js",
-    "exports": {
+  "module": "./dist/index.es.js",
+  "exports": {
     ".": {
-    "import": "./dist/index.es.js",
-    "require": "./dist/index.umd.js"
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
     }
-    },
-    "repository": {
-  "type": "git",
-  "url": "https://github.com/adamjkb/netlify-cms-widget-select-async.git"
-},
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adamjkb/netlify-cms-widget-select-async.git"
+  },
   "scripts": {
     "dev": "vite",
     "example": "run-p start:cms-proxy dev",
@@ -36,7 +38,7 @@
   "devDependencies": {
     "eslint": "^7.27.0",
     "eslint-plugin-react": "^7.23.2",
-    "fuzzy": "^0.1.3",
+    "fuse.js": "^6.4.6",
     "immutable": "^3.8.2",
     "lodash": "^4.17.21",
     "netlify-cms": "^2.10.130",
