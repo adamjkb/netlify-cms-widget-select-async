@@ -39,27 +39,17 @@ export default {
                                 name: 'title',
                                 widget: 'string',
                             },
-                            // {
-                            //     label: 'Select',
-                            //     name: 'select',
-                            //     widget: 'select',
-                            //     options: [
-                            //         { label: 'Option 1', value: 'opt-1' },
-                            //         { label: 'Option 2', value: 'opt-2' },
-                            //         { label: 'Option 3', value: 'opt-3' },
-                            //         { label: 'Option 4', value: 'opt-4' },
-                            //     ]
-                            // },
                             {
-                                label: 'Select but external',
-                                name: 'select-external',
-                                widget: 'select-ext',
+                                label: 'Select async',
+                                name: 'productVariants',
+                                widget: 'select-async',
                                 url: 'https://graphql.myshopify.com/api/graphql',
                                 // https://neo-type-foundry.myshopify.com/api/2021-04/graphql.json
                                 value_field: 'node.value',
                                 display_field: 'node.label',
                                 data_path: 'data.products.edges', // path=a.0.b.c
                                 refetch_url: true,
+                                multiple: true,
                                 grouped_options: {
                                     data_path: 'node.options.edges', // data position related to the parent object
                                     value_field: 'node.id',

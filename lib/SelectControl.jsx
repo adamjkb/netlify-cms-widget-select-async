@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import AsyncSelect from 'react-select/async'
-import { get, find, isEmpty, last, debounce } from 'lodash'
+import { get, find, debounce } from 'lodash'
 import { List, Map, fromJS } from 'immutable'
 import { reactSelectStyles } from 'netlify-cms-ui-default/dist/esm/styles'
 import Fuse from 'fuse.js'
@@ -23,18 +23,47 @@ const fieldDefaults = {
 }
 
 
+// grouped styles
+const groupStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0 10px 5px'
+}
+const groupBadgeStyles = {
+    backgroundColor: '#EBECF0',
+    borderRadius: '2em',
+    color: '#172B4D',
+    display: 'inline-block',
+    fontSize: 12,
+    fontWeight: 'normal',
+    lineHeight: '1',
+    minWidth: 1,
+    padding: '0.16666666666667em 0.5em',
+    textAlign: 'center',
+}
+
+const formatGroupLabel = data => (
+    <div style={groupStyles}>
+        <span>{data.label}</span>
+        <span style={groupBadgeStyles}>{data.options.length}</span>
+    </div>
+)
+
 function optionToString(option) {
     return option && option.value ? option.value : ''
 }
 
-function convertToOption(raw) {
-    if (typeof raw === 'string') {
-        return { label: raw, value: raw }
-    }
-    return Map.isMap(raw) ? raw.toJS() : raw
-}
+// function convertToOption(raw) {
+//     if (typeof raw === 'string') {
+//         return { label: raw, value: raw }
+//     }
+//     return Map.isMap(raw) ? raw.toJS() : raw
+// }
 
 function getSelectedValue({ value, options, isMultiple }) {
+    if (!options) return
+
     if (isMultiple) {
         const selectedOptions = List.isList(value) ? value.toJS() : value
 
@@ -42,12 +71,54 @@ function getSelectedValue({ value, options, isMultiple }) {
             return null
         }
 
-        return selectedOptions
-            .map(i => options.find(o => o.value === (i.value || i)))
-            .filter(Boolean)
-            .map(convertToOption)
+        let selectedValues = []
+        selectedOptions.forEach(value => {
+            const result = options.find(o => o.value === value)
+            if (result) {
+                selectedValues.push(result)
+                return
+            }
+            // console.log(value)
+            // console.log(options);
+            options.some(({options: nestedOptions, label}) => {
+                if (!nestedOptions) return
+                const result = find(nestedOptions, ['value', value])
+                if (result) {
+                    const formatedResult = {
+                        ...result,
+                        label: label + ': ' + (result.label || result.value)
+                    }
+
+                    selectedValues.push(formatedResult)
+                    return true
+                }
+            })
+        })
+
+        if (selectedValues) {
+            return selectedValues
+        }
+
     } else {
-        return find(options, ['value', value]) || null
+        let selectedValue = find(options, ['value', value])
+
+        if (selectedValue) return selectedValue
+
+        // dig deeper
+        options.some(({ options: nestedOptions }, item) => {
+            if (!nestedOptions) return
+            const result = find(nestedOptions, ['value', value])
+            if (result) {
+                selectedValue = result
+                return true // break loop
+            }
+        })
+
+        if (selectedValue) {
+            return selectedValue
+        } else {
+            return null
+        }
     }
 }
 
@@ -55,11 +126,10 @@ export class Control extends React.Component {
 
     constructor(props) {
         super(props)
-        this.allOptions = ''
         this.fuse = null
+
         this.state = {
             allOptions: null,
-            initialFetch: true
         }
 
         this.loadOptions = debounce(this.loadOptions.bind(this), 100, { leading: true, trailing:true, maxWait: 300 })
@@ -71,27 +141,20 @@ export class Control extends React.Component {
         this.getOptions = this.getOptions.bind(this)
     }
 
-    handleChange(selectedOption, ...rest) {
+    handleChange(selectedOption) {
         const { onChange, field } = this.props
-        let value
+        const isMultiple = field.get('multiple', fieldDefaults.multiple)
+        const isEmpty = isMultiple ? !selectedOption?.length : !selectedOption
 
-        if (Array.isArray(selectedOption)) {
-            value = selectedOption.map(optionToString)
-            onChange(fromJS(value), {
-                [field.get('name')]: {
-                    [field.get('collection')]: {
-                        [last(value)]:
-                !isEmpty(selectedOption) && last(selectedOption).data,
-                    },
-                },
-            })
+        if (field.get('required') && isEmpty && isMultiple) {
+            onChange(List())
+        } else if (isEmpty) {
+            onChange(null)
+        } else if (isMultiple) {
+            const options = selectedOption.map(optionToString)
+            onChange(fromJS(options))
         } else {
-            value = optionToString(selectedOption)
-            onChange(value, {
-                [field.get('name')]: {
-                    [field.get('collection')]: { [value]: selectedOption.data },
-                },
-            })
+            onChange(optionToString(selectedOption))
         }
     }
 
@@ -140,9 +203,8 @@ export class Control extends React.Component {
         }
     }
 
-
     fuzzySearch(term, data) {
-        const _processResults = (results) => results.length > 0 ? results.map(({ item }) => item) : []
+        const processResults = (results) => results.length > 0 ? results.map(({ item }) => item) : []
         const {
             isGroupedOptions
 
@@ -150,7 +212,7 @@ export class Control extends React.Component {
 
         if (this.fuse) {
             const results = this.fuse.search(term)
-            return _processResults(results)
+            return processResults(results)
         }
 
         let searchKeys = [
@@ -172,7 +234,7 @@ export class Control extends React.Component {
         this.fuse = new Fuse(data, fuseOptions)
         const results = this.fuse.search(term)
 
-        return _processResults(results)
+        return processResults(results)
 
     }
 
@@ -295,16 +357,8 @@ export class Control extends React.Component {
     async getOptions(term) {
         const { refetchUrl } = this.getFieldValues()
 
-        console.log(1)
-
-
-        // something fucky goin on here 🤔
-
-
-
         // no options in-state or refetch url with each term
         if (!this.state.allOptions || refetchUrl) {
-            console.log(2)
             // fetch options
             const rawOptions = await this.fetchUrl({ term })
 
@@ -315,7 +369,6 @@ export class Control extends React.Component {
         }
 
         if (term) {
-            console.log(3)
             const searchResults = this.fuzzySearch(term, this.state.allOptions)
             return searchResults
         } else {
@@ -326,7 +379,6 @@ export class Control extends React.Component {
     loadOptions(term, callback) {
         this.getOptions(term).then(options => callback(options))
     }
-
 
     render() {
         const {
@@ -347,38 +399,9 @@ export class Control extends React.Component {
             isMultiple,
         })
 
-
-        // grouped styles
-        const groupStyles = {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 10px 5px'
-        }
-        const groupBadgeStyles = {
-            backgroundColor: '#EBECF0',
-            borderRadius: '2em',
-            color: '#172B4D',
-            display: 'inline-block',
-            fontSize: 12,
-            fontWeight: 'normal',
-            lineHeight: '1',
-            minWidth: 1,
-            padding: '0.16666666666667em 0.5em',
-            textAlign: 'center',
-        }
-
-        const formatGroupLabel = data => (
-            <div style={groupStyles}>
-                <span>{data.label}</span>
-                <span style={groupBadgeStyles}>{data.options.length}</span>
-            </div>
-        )
-
         return (
             <AsyncSelect
                 defaultOptions
-                defaultMenuIsOpen={true}
                 className={classNameWrapper}
                 inputId={forID}
                 isClearable={isClearable}

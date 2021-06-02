@@ -1,4 +1,8 @@
 {
   "title": "Page title",
-  "select-external": "Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8zNjYwNzczODk0Nw=="
+  "productVariants": [
+    "Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8zNjYwNzYyMjE0Nw==",
+    "Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8zNjYwNzcyNDA5OQ==",
+    "Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8zNjYwNzczOTA3NQ=="
+  ]
 }
