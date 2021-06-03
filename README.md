@@ -94,7 +94,7 @@ fields:
 
 ```
 ## Options
-#### `url` _string_
+#### `url` _string_ <a name="url"></a>
 
 Endpoint URL
 
@@ -102,7 +102,7 @@ _Example: https://fakestoreapi.com/products_
 
 <br/>
 
-#### `display_field` _string | default: "label"_
+#### `display_field` _string | default: "label"_ <a name="display_field"></a>
 
 Object key or path to object to be displayed.
 
@@ -110,7 +110,7 @@ _Example: `node.label` or `title`_
 
 <br/>
 
-#### `value_field` _string | default: "value"_
+#### `value_field` _string | default: "value"_ <a name="value_field"></a>
 
 Object key or path to object to be saved.
 
@@ -118,7 +118,7 @@ _Example: `node.value` or `id`_
 
 <br/>
 
-#### `data_path` _string?_
+#### `data_path` _string?_ <a name="data_path"></a>
 
 Object key or path to object to the array of objects to be used as options.
 
@@ -128,20 +128,20 @@ _Example: `data.products.edges` or `data`_
 
 <br/>
 
-#### `multiple` _boolean | default: false_
+#### `multiple` _boolean | default: false_ <a name="multiple"></a>
 
 Allows multiple options to be selected. Widget's output value is going to change to an `string[]`
 
 <br/>
 
-#### `min` and `max` _integer?_
+#### `min` and `max` _integer?_ <a name="min"></a><a name="max"></a>
 
 minimum and maximum number of items allowed to be selected
 > ignored if [`multiple`](#multiple) is false
 
 <br/>
 
-#### `refetch_url` _boolean | default: true_
+#### `refetch_url` _boolean | default: true_ <a name="refetch_url"></a>
 
 By default `react-select` will send a try to load new options through a new request whenever the search input changes, setting this field's value to `false` will prevent that and retain the options after the initial request.
 
