@@ -9,7 +9,7 @@ collections:
     label: "Pages"
     delete: false
     editor:
-      preview: false
+      preview: true
     files:
       - label: "Home"
         name: "home"

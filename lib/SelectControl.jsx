@@ -7,120 +7,7 @@ import { List, Map, fromJS } from 'immutable'
 import { reactSelectStyles } from 'netlify-cms-ui-default/dist/esm/styles'
 import Fuse from 'fuse.js'
 
-
-const fieldDefaults = {
-    value_field: 'value',
-    label_field: 'label',
-    multiple: false,
-    required: true,
-    cache_options: false,
-    refetch_url: true,
-    fetch_options: {
-        headers: {},
-        method: 'GET',
-        body: undefined
-    }
-}
-
-
-// grouped styles
-const groupStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 10px 5px'
-}
-const groupBadgeStyles = {
-    backgroundColor: '#EBECF0',
-    borderRadius: '2em',
-    color: '#172B4D',
-    display: 'inline-block',
-    fontSize: 12,
-    fontWeight: 'normal',
-    lineHeight: '1',
-    minWidth: 1,
-    padding: '0.16666666666667em 0.5em',
-    textAlign: 'center',
-}
-
-const formatGroupLabel = data => (
-    <div style={groupStyles}>
-        <span>{data.label}</span>
-        <span style={groupBadgeStyles}>{data.options.length}</span>
-    </div>
-)
-
-function optionToString(option) {
-    return option && option.value ? option.value : ''
-}
-
-// function convertToOption(raw) {
-//     if (typeof raw === 'string') {
-//         return { label: raw, value: raw }
-//     }
-//     return Map.isMap(raw) ? raw.toJS() : raw
-// }
-
-function getSelectedValue({ value, options, isMultiple }) {
-    if (!options) return
-
-    if (isMultiple) {
-        const selectedOptions = List.isList(value) ? value.toJS() : value
-
-        if (!selectedOptions || !Array.isArray(selectedOptions)) {
-            return null
-        }
-
-        let selectedValues = []
-        selectedOptions.forEach(value => {
-            const result = options.find(o => o.value === value)
-            if (result) {
-                selectedValues.push(result)
-                return
-            }
-            // console.log(value)
-            // console.log(options);
-            options.some(({options: nestedOptions, label}) => {
-                if (!nestedOptions) return
-                const result = find(nestedOptions, ['value', value])
-                if (result) {
-                    const formatedResult = {
-                        ...result,
-                        label: label + ': ' + (result.label || result.value)
-                    }
-
-                    selectedValues.push(formatedResult)
-                    return true
-                }
-            })
-        })
-
-        if (selectedValues) {
-            return selectedValues
-        }
-
-    } else {
-        let selectedValue = find(options, ['value', value])
-
-        if (selectedValue) return selectedValue
-
-        // dig deeper
-        options.some(({ options: nestedOptions }, item) => {
-            if (!nestedOptions) return
-            const result = find(nestedOptions, ['value', value])
-            if (result) {
-                selectedValue = result
-                return true // break loop
-            }
-        })
-
-        if (selectedValue) {
-            return selectedValue
-        } else {
-            return null
-        }
-    }
-}
+import { formatGroupLabel } from './styles.jsx'
 
 export class Control extends React.Component {
 
@@ -167,12 +54,12 @@ export class Control extends React.Component {
         // Data options
         const valueField = field.get('value_field', fieldDefaults.value_field)
         const displayField = field.get('display_field', fieldDefaults.display_field)
-        const searchField = field.get('search_field') || displayField
+        // const searchField = field.get('search_field') || displayField
         // Grouped options
         const isGroupedOptions = !!field.get('grouped_options')
         const groupedValueField = field.getIn(['grouped_options', 'value_field'], fieldDefaults.value_field)
         const groupedDisplayField = field.getIn(['grouped_options', 'display_field'], fieldDefaults.display_field)
-        const groupedSearchField = field.getIn(['grouped_options', 'search_field']) || groupedDisplayField
+        // const groupedSearchField = field.getIn(['grouped_options', 'search_field']) || groupedDisplayField
         const groupedDataPath = field.getIn(['grouped_options', 'data_path'])
         // Fetch options
         const url = field.get('url')
@@ -187,11 +74,11 @@ export class Control extends React.Component {
         return {
             valueField,
             displayField,
-            searchField,
+            // searchField,
             isGroupedOptions,
             groupedValueField,
             groupedDisplayField,
-            groupedSearchField,
+            // groupedSearchField,
             groupedDataPath,
             url,
             refetchUrl,
@@ -439,4 +326,82 @@ Control.propTypes = {
     setActiveStyle: PropTypes.func.isRequired,
     setInactiveStyle: PropTypes.func.isRequired,
     hasActiveStyle: PropTypes.func,
+}
+
+
+const fieldDefaults = {
+    value_field: 'value',
+    label_field: 'label',
+    multiple: false,
+    required: true,
+    cache_options: false,
+    refetch_url: true,
+    fetch_options: {
+        headers: {},
+        method: 'GET',
+        body: undefined
+    }
+}
+
+
+function optionToString(option) {
+    return option && option.value ? option.value : ''
+}
+
+function getSelectedValue({ value, options, isMultiple }) {
+    if (!options) return
+
+    if (isMultiple) {
+        const selectedOptions = List.isList(value) ? value.toJS() : value
+
+        if (!selectedOptions || !Array.isArray(selectedOptions)) {
+            return null
+        }
+
+        let selectedValues = []
+        selectedOptions.forEach(value => {
+            const result = options.find(o => o.value === value)
+            if (result) {
+                selectedValues.push(result)
+                return
+            }
+            options.some(({options: nestedOptions, label}) => {
+                if (!nestedOptions) return
+                const result = find(nestedOptions, ['value', value])
+                if (result) {
+                    const formatedResult = {
+                        ...result,
+                        label: label + ': ' + (result.label || result.value)
+                    }
+                    selectedValues.push(formatedResult)
+                    return true
+                }
+            })
+        })
+
+        if (selectedValues) {
+            return selectedValues
+        }
+
+    } else {
+        let selectedValue = find(options, ['value', value])
+
+        if (selectedValue) return selectedValue
+
+        // dig deeper
+        options.some(({ options: nestedOptions }, item) => {
+            if (!nestedOptions) return
+            const result = find(nestedOptions, ['value', value])
+            if (result) {
+                selectedValue = result
+                return true // break loop
+            }
+        })
+
+        if (selectedValue) {
+            return selectedValue
+        } else {
+            return null
+        }
+    }
 }
