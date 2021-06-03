@@ -1,0 +1,3 @@
+- [ ] Write schema
+- [ ] Make NetlifyCMS to be used publicly
+- [ ] Deploy example folder to Netlify

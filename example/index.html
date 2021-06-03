@@ -11,13 +11,14 @@
             window.CMS_MANUAL_INIT = true
         </script>
         <script src='https://unpkg.com/netlify-cms/dist/netlify-cms.js'></script>
+        <!-- <script src='https://unpkg.com/@adamjkb/netlify-cms-widget-select-async@0.0.3/dist/index.umd.js'></script> -->
 
         <script type="module">
-            import config from './sample-config.js'
-            import { Widget as SelectExternalWidget } from '../lib'
+            import config from './config.js'
+            import { Widget as AsyncSelectWidget } from '../lib'
 
             CMS.init(config)
-            CMS.registerWidget(SelectExternalWidget)
+            CMS.registerWidget(AsyncSelectWidget)
         </script>
     </body>
 </html>

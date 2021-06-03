@@ -1,0 +1,45 @@
+backend:
+  name: git-gateway
+  branch: main
+local_backend: true
+media_folder: example/assets/images/
+public_folder: example/assets/public/
+collections:
+  - name: "pages"
+    label: "Pages"
+    delete: false
+    editor:
+      preview: false
+    files:
+      - label: "Home"
+        name: "home"
+        delete: false
+        file: example/data/home.json
+        extension: json
+        fields:
+          - name: simple_usage
+            label: Simple usage
+            widget: select-async
+            # widget options:
+            url: https://fakestoreapi.com/products
+            value_field: id
+            display_field: title
+          - name: advanced_usage
+            label: Advanced usage
+            widget: select-async
+            # widget options:
+            url: https://graphql.myshopify.com/api/graphql
+            value_field: node.value
+            display_field: node.label
+            data_path: data.products.edges
+            multiple: true
+            grouped_options:
+                data_path: node.options.edges
+                value_field: node.id
+                display_field: node.title
+            fetch_options:
+                headers:
+                    Content-Type: application/json
+                    X-Shopify-Storefront-Access-Token: dd4d4dc146542ba7763305d71d1b3d38
+                method: POST
+                body: '{"query": "query allProducts{ products(first:10) { edges { node { label: title value: id options: variants(first:3) { edges { node { id title } } } } } } }"}'

@@ -1,8 +1,9 @@
 {
-  "title": "Page title",
-  "productVariants": [
+  "title": "Async select widgets",
+  "advanced_usage": [
     "Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8zNjYwNzYyMjE0Nw==",
     "Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8zNjYwNzcyNDA5OQ==",
     "Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8zNjYwNzczOTA3NQ=="
-  ]
+  ],
+  "simple_usage": 2
 }

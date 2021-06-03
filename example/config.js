@@ -4,26 +4,22 @@ export default {
             name: 'git-gateway',
             branch:'main'
         },
-        slug: {
-            clean_accents: true
-        },
         load_config_file: false,
         local_backend: true,
-        site_url: 'http://localhost:3000',
-        display_url: 'http://localhost:3000',
         media_folder: '/example/assets/images/',
-        public_folder: '/',
+        public_folder: '/example/assets/public/',
         label: 'Pages',
         name: 'pages',
         description: '',
         delete: false,
-        editor:{ preview: false },
+        editor: {
+            preview: false
+        },
         collections: [
             {
 
                 label: 'Pages',
                 name: 'pages',
-                description: '',
                 delete: false,
                 editor:{ preview: false },
                 files: [
@@ -40,11 +36,20 @@ export default {
                                 widget: 'string',
                             },
                             {
-                                label: 'Select async',
-                                name: 'productVariants',
+                                label: 'Simple usage',
+                                name: 'simple_usage',
                                 widget: 'select-async',
+                                hint: 'Using a simple REST API',
+                                url: 'https://fakestoreapi.com/products',
+                                value_field: 'id',
+                                display_field: 'title',
+                            },
+                            {
+                                label: 'Advanced usage',
+                                name: 'advanced_usage',
+                                widget: 'select-async',
+                                hint: 'Using GraphQL query',
                                 url: 'https://graphql.myshopify.com/api/graphql',
-                                // https://neo-type-foundry.myshopify.com/api/2021-04/graphql.json
                                 value_field: 'node.value',
                                 display_field: 'node.label',
                                 data_path: 'data.products.edges', // path=a.0.b.c
