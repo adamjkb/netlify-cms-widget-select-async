@@ -137,7 +137,7 @@ Allows multiple options to be selected. Widget's output value is going to change
 #### `min` and `max` _integer?_
 
 minimum and maximum number of items allowed to be selected
-> ignored if `[multiple](#multiple)` is false
+> ignored if [`multiple`](#multiple) is false
 
 <br/>
 
