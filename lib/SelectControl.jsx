@@ -5,6 +5,7 @@ import AsyncSelect from 'react-select/async'
 import { get, find, debounce } from 'lodash'
 import { List, Map, fromJS } from 'immutable'
 import { reactSelectStyles } from 'netlify-cms-ui-default/dist/esm/styles'
+import { validations } from 'netlify-cms-lib-widgets'
 import Fuse from 'fuse.js'
 
 import { formatGroupLabel } from './styles.jsx'
@@ -44,6 +45,26 @@ export class Control extends React.Component {
             onChange(optionToString(selectedOption))
         }
     }
+    isValid() {
+        const { field, value, t } = this.props
+        const min = field.get('min')
+        const max = field.get('max')
+
+        if (!field.get('multiple')) {
+            return { error: false }
+        }
+
+        const error = validations.validateMinMax(
+            t,
+            field.get('label', field.get('name')),
+            value,
+            min,
+            max,
+        )
+        return error ? { error } : { error: false }
+
+    }
+
 
     /**
      * Get field values
@@ -326,6 +347,7 @@ Control.propTypes = {
     setActiveStyle: PropTypes.func.isRequired,
     setInactiveStyle: PropTypes.func.isRequired,
     hasActiveStyle: PropTypes.func,
+    t: PropTypes.func,
 }
 
 

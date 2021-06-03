@@ -48,13 +48,15 @@ export default {
                                 label: 'Advanced usage',
                                 name: 'advanced_usage',
                                 widget: 'select-async',
-                                hint: 'Using GraphQL query',
+                                hint: 'Using GraphQL query 2',
                                 url: 'https://graphql.myshopify.com/api/graphql',
                                 value_field: 'node.value',
                                 display_field: 'node.label',
                                 data_path: 'data.products.edges', // path=a.0.b.c
                                 refetch_url: true,
                                 multiple: true,
+                                min: 1,
+                                max: 3,
                                 grouped_options: {
                                     data_path: 'node.options.edges', // data position related to the parent object
                                     value_field: 'node.id',

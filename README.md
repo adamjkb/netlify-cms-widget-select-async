@@ -134,11 +134,18 @@ Allows multiple options to be selected. Widget's output value is going to change
 
 <br/>
 
+#### `min` and `max` _integer?_
+
+minimum and maximum number of items allowed to be selected
+> ignored if `[multiple](#multiple)` is false
+
+<br/>
+
 #### `refetch_url` _boolean | default: true_
 
 By default `react-select` will send a try to load new options through a new request whenever the search input changes, setting this field's value to `false` will prevent that and retain the options after the initial request.
 
-> Note that the fetched options are filtered with fuzzy search so the search input will affect the displayed options. 
+> Note that the fetched options are filtered with fuzzy search so the search input will affect the displayed options.
 
 ## Authors
 
