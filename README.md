@@ -12,17 +12,27 @@ A select widget for [NetlifyCMS](https://www.netlifycms.org/) widget that allows
 
 `TODO: Add screenshot`
 
-`TODO: Add Table of Contents`
+## Table of contents
+ * [Features](#features)
+ * [Install](#install)
+     - [Via NPM](#via-npm)
+     - [Via `script` tag](#via-script-tag)
+ * [How to use](#how-to-use)
+     - [Simple usage](#simple-usage)
+     - [Advanced usage](#advanced-usage)
+ * [Options](#options)
+ * [Authors](#authors)
+ * [Acknowledgments](#acknowledgments)
 
 
-## Features <a name="features"></a>
+## Features
 - Support for custom `fetch()` request parameters like headers, method, and body
 - Supports GraphQL and REST APIs
 - Nested data structures
 - Grouped options
 - Fuzzy searching fetched options
 
-## Install <a name="install"></a>
+## Install
 #### Via NPM:
 ```bash
 npm install @adamjkb/netlify-cms-widget-async
@@ -42,10 +52,10 @@ CMS.registerWidget(AsyncSelectWidget)
 </script>
 ```
 
-## How to use <a name="how-to-use"></a>
+## How to use
 
 
-### Simple usage <a name="simple-usage"></a>
+### Simple usage
 Add to your NetlifyCMS collection:
 ```yml
 fields:
@@ -58,7 +68,7 @@ fields:
     display_field: title
 
 ```
-### Advanced usage <a name="advanced-usage"></a>
+### Advanced usage
 Add to your NetlifyCMS collection:
 ```yml
 fields:
@@ -83,13 +93,56 @@ fields:
         body: '{"query": "query allProducts{ products(first:10) { edges { node { label: title value: id options: variants(first:3) { edges { node { id title } } } } } } }"}'
 
 ```
-## Options <a name="widget-options"></a>
-`TODO`
+## Options
+#### `url` _string_
 
+Endpoint URL
 
-## Authors <a name="authors"></a>
+_Example: https://fakestoreapi.com/products_
+
+<br/>
+
+#### `display_field` _string | default: "label"_
+
+Object key or path to object to be displayed.
+
+_Example: `node.label` or `title`_
+
+<br/>
+
+#### `value_field` _string | default: "value"_
+
+Object key or path to object to be saved.
+
+_Example: `node.value` or `id`_
+
+<br/>
+
+#### `data_path` _string?_
+
+Object key or path to object to the array of objects to be used as options.
+
+If `fetch()` request does not return an array of object but an object this value can be used to access the array.
+
+_Example: `data.products.edges` or `data`_
+
+<br/>
+
+#### `multiple` _boolean | default: false_
+
+Allows multiple options to be selected. Widget's output value is going to change to an `string[]`
+
+<br/>
+
+#### `refetch_url` _boolean | default: true_
+
+By default `react-select` will send a try to load new options through a new request whenever the search input changes, setting this field's value to `false` will prevent that and retain the options after the initial request.
+
+> Note that the fetched options are filtered with fuzzy search so the search input will affect the displayed options. 
+
+## Authors
 
 - [@adamjkb](https://github.com/adamjkb)
 
-## Acknowledgments <a name="acknowledgments"></a>
+## Acknowledgments
 The project was heavily inspired by [@chrisboustead](https://github.com/chrisboustead)'s asynchronous implementation of the original NetlifyCMS Select widget, [`netlify-cms-widget-select-async`](https://github.com/chrisboustead/netlify-cms-widget-async-select)

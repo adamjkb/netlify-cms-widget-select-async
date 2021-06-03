@@ -1,3 +1,4 @@
 - [x] Write schema
-- [ ] Make NetlifyCMS to be used publicly
+- [ ] Complete documentation
+- [ ] Make demo CMS to be used publicly
 - [ ] Deploy example folder to Netlify

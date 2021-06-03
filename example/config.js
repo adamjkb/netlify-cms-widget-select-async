@@ -60,7 +60,6 @@ export default {
                                     value_field: 'node.id',
                                     display_field: 'node.title',
                                 },
-                                cache_options: true, // react-select option, caches already fetched result to a specific term
                                 fetch_options: {
                                     headers: {
                                         'Content-Type': 'application/json',

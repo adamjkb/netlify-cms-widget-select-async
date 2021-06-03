@@ -334,7 +334,6 @@ const fieldDefaults = {
     label_field: 'label',
     multiple: false,
     required: true,
-    cache_options: false,
     refetch_url: true,
     fetch_options: {
         headers: {},
