@@ -315,7 +315,7 @@ export class Control extends React.Component {
                 label: entry.getIn(displayField.split('.')),
                 ...(
                     // add options object key if size is greater than 1
-                    entry.getIn(groupedDataPath.split('.')).count() > 1 ?
+                    entry.hasIn(groupedDataPath.split('.')) && entry.getIn(groupedDataPath.split('.')).count() > 1 ?
                         {
                             options: entry.getIn(groupedDataPath.split('.')).map(optionsEntry => {
                                 return {
@@ -325,12 +325,20 @@ export class Control extends React.Component {
                                 }
                             })
                         }
+                    // Otherwise merge the label with its parent's label
                         :
                         {
                             value: entry.getIn([...groupedDataPath.split('.'), 0,...groupedValueField.split('.')]),
                             label: entry.getIn(displayField.split('.')) + /* Seperator */': ' + entry.getIn([...groupedDataPath.split('.'), 0,...groupedDisplayField.split('.')]),
                             groupData: entry.getIn([...groupedDataPath.split('.'), 0])
                         }
+                ),
+                // If groupedDataPath retrieves no result fallback to parents value
+                ...(
+                    !entry.hasIn(groupedDataPath.split('.')) &&
+                    {
+                        value: entry.getIn(valueField.split('.'))
+                    }
                 ),
                 data: entry
             }))
