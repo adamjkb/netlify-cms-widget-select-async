@@ -1,13 +1,14 @@
 export default {
     config: {
-        backend: {
+        backend: import.meta.env.DEV ? {
             name: 'git-gateway',
             branch:'main'
+        } : {
+            name: 'test-repo'
         },
         load_config_file: false,
-        local_backend: true,
+        local_backend: import.meta.env.DEV,
         media_folder: '/example/assets/images/',
-        public_folder: '/example/assets/public/',
         label: 'Pages',
         name: 'pages',
         description: '',
@@ -24,17 +25,12 @@ export default {
                 editor:{ preview: false },
                 files: [
                     {
-                        label           :'Home',
-                        name            :'home',
+                        label           :'Demo',
+                        name            :'demo',
                         delete          :false,
-                        file            :'example/data/home.json',
+                        file            :'example/data/example.json',
                         extension       :'json',
                         fields: [
-                            {
-                                label: 'Title',
-                                name: 'title',
-                                widget: 'string',
-                            },
                             {
                                 label: 'Simple usage',
                                 name: 'simple_usage',
@@ -48,17 +44,16 @@ export default {
                                 label: 'Advanced usage',
                                 name: 'advanced_usage',
                                 widget: 'select-async',
-                                hint: 'Using GraphQL query 2',
+                                hint: 'POST request, headers, and body. Groupping nested options.',
                                 url: 'https://graphql.myshopify.com/api/graphql',
                                 value_field: 'node.value',
                                 display_field: 'node.label',
-                                data_path: 'data.products.edges', // path=a.0.b.c
-                                refetch_url: true,
+                                data_path: 'data.products.edges',
                                 multiple: true,
                                 min: 1,
                                 max: 3,
                                 grouped_options: {
-                                    data_path: 'node.options.edges', // data position related to the parent object
+                                    data_path: 'node.options.edges',
                                     value_field: 'node.id',
                                     display_field: 'node.title',
                                 },
@@ -69,18 +64,27 @@ export default {
                                     },
                                     method: 'POST',
                                     body: '{"query": "query allProducts{ products(first:10) { edges { node { label: title value: id options: variants(first:3) { edges { node { id title } } } } } } }"}',
-                                    // @{type} function
-                                    // {params}
-                                    /**
-                                     *  A function creating the fetch params object
-                                     *  @param {Object} opts - Object composed of default or set values
-                                     *  @param {string} opts.term - Search term entered to filter results from input field
-                                     *  @param {string} opts.url - URL
-                                     *  @param {string} opts.headers - Headers | default: {}
-                                     *  @param {string} opts.body - Body
-                                     *  @param {string} opts.method - Method | default: 'GET'
-                                     *  @returns {Object} object of url and options
-                                     */
+                                }
+                            },
+                            {
+                                label: 'Dynamic fetch request body',
+                                name: 'custom_fetch_options',
+                                widget: 'select-async',
+                                hint: 'Using `fetch_options.params_function` to format the fetch request. Server-side filtering.',
+                                url: 'https://graphql.myshopify.com/api/graphql',
+                                value_field: 'node.value',
+                                display_field: 'node.label',
+                                data_path: 'data.products.edges',
+                                refetch_url: true,
+                                fuzzy_search: false,
+                                required: false,
+                                fetch_options: {
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Shopify-Storefront-Access-Token': 'dd4d4dc146542ba7763305d71d1b3d38'
+                                    },
+                                    method: 'POST',
+                                    body: '{"query": "query allProducts{ products(first:10) { edges { node { label: title value: id options: variants(first:3) { edges { node { id title } } } } } } }"}',
                                     params_function: ({ term, url, ...rest }) => ({
                                         url,
                                         options: {

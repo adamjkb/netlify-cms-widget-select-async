@@ -3,7 +3,6 @@ backend:
   branch: main
 local_backend: true
 media_folder: example/assets/images/
-public_folder: example/assets/public/
 collections:
   - name: "pages"
     label: "Pages"

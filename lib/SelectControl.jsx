@@ -75,39 +75,39 @@ export class Control extends React.Component {
         // Data options
         const valueField = field.get('value_field', fieldDefaults.value_field)
         const displayField = field.get('display_field', fieldDefaults.display_field)
-        // const searchField = field.get('search_field') || displayField
+        const dataPath = field.get('data_path')
+
         // Grouped options
         const isGroupedOptions = !!field.get('grouped_options')
         const groupedValueField = field.getIn(['grouped_options', 'value_field'], fieldDefaults.value_field)
         const groupedDisplayField = field.getIn(['grouped_options', 'display_field'], fieldDefaults.display_field)
-        // const groupedSearchField = field.getIn(['grouped_options', 'search_field']) || groupedDisplayField
-        const groupedDataPath = field.getIn(['grouped_options', 'data_path'])
+        const groupedDataPath = field.getIn(['grouped_options', 'data_path'], )
+
         // Fetch options
         const url = field.get('url')
-        const refetchUrl = field.get('refetch_url', fieldDefaults.refetch_url)
-
         const method = field.getIn(['fetch_options','method'], fieldDefaults.fetch_options.method)
         const headers = field.hasIn(['fetch_options','headers']) ? field.getIn(['fetch_options','headers']).toObject() : fieldDefaults.fetch_options.headers
         const body = field.getIn(['fetch_options','body'], fieldDefaults.fetch_options.body)
         const paramsFunction = field.getIn(['fetch_options', 'params_function'])
-        const dataPath = field.get('data_path')
 
+        // Global settings
+        const refetchUrl = field.get('refetch_url', fieldDefaults.refetch_url)
+        const fuzzySearch = field.get('fuzzy_search', fieldDefaults.fuzzy_search)
         return {
-            valueField,
-            displayField,
-            // searchField,
-            isGroupedOptions,
-            groupedValueField,
-            groupedDisplayField,
-            // groupedSearchField,
-            groupedDataPath,
-            url,
-            refetchUrl,
-            method,
-            headers,
             body,
-            paramsFunction,
             dataPath,
+            displayField,
+            fuzzySearch,
+            groupedDataPath,
+            groupedDisplayField,
+            groupedValueField,
+            headers,
+            isGroupedOptions,
+            method,
+            paramsFunction,
+            refetchUrl,
+            url,
+            valueField,
         }
     }
 
@@ -198,7 +198,8 @@ export class Control extends React.Component {
         try {
             const res = await fetch(fetchParams.url, fetchParams.options)
                 .then(data => data.json())
-                .then(json => fromJS(dataPath ? get(json, dataPath.split('.'), json): json)) // drill JSON if selected
+                .then(json => fromJS(json))
+                .then(jsObject => dataPath ? jsObject.getIn(dataPath.split('.')) : jsObject) // drill JSON if selected
 
             return res
         } catch (e) {
@@ -271,7 +272,7 @@ export class Control extends React.Component {
     }
 
     async getOptions(term) {
-        const { refetchUrl } = this.getFieldValues()
+        const { refetchUrl, fuzzySearch } = this.getFieldValues()
 
         // no options in-state or refetch url with each term
         if (!this.state.allOptions || refetchUrl) {
@@ -284,7 +285,7 @@ export class Control extends React.Component {
             })
         }
 
-        if (term) {
+        if (term && fuzzySearch) {
             const searchResults = this.fuzzySearch(term, this.state.allOptions)
             return searchResults
         } else {
@@ -308,6 +309,7 @@ export class Control extends React.Component {
 
         const isMultiple = field.get('multiple', fieldDefaults.multiple)
         const isClearable = !field.get('required', fieldDefaults.required) || isMultiple
+        const isSearchable = !(!field.get('fuzzy_search', fieldDefaults.fuzzy_search) && !field.get('refetch_url', fieldDefaults.refetch_url))
 
         const selectedValue = getSelectedValue({
             options: this.state.allOptions,
@@ -325,7 +327,7 @@ export class Control extends React.Component {
                 formatGroupLabel={formatGroupLabel}
                 loadOptions={this.loadOptions}
                 onChange={this.handleChange}
-                isSearchable
+                isSearchable={isSearchable}
                 onBlur={setInactiveStyle}
                 onFocus={setActiveStyle}
                 placeholder=""
@@ -357,6 +359,7 @@ const fieldDefaults = {
     multiple: false,
     required: true,
     refetch_url: true,
+    fuzzy_search: true,
     fetch_options: {
         headers: {},
         method: 'GET',

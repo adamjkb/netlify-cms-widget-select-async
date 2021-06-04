@@ -1,4 +1,0 @@
-- [x] Write schema
-- [ ] Complete documentation
-- [ ] Make demo CMS to be used publicly
-- [ ] Deploy example folder to Netlify

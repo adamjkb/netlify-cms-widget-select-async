@@ -88,6 +88,7 @@ fields:
     min: 1
     max: 4
     refetch_url: false
+    fuzzy_search: true
     fetch_options:
         headers:
             Content-Type: application/json
@@ -141,14 +142,6 @@ Allows multiple options to be selected. Widget's output value is going to change
 
 Minimum and maximum number of items allowed to be selected
 > ignored if [`multiple`](#multiple) is false
-
-<br/>
-
-### `refetch_url` _boolean | default: true_ <a name="refetch_url"></a>
-
-By default `react-select` will send a try to load new options through a new request whenever the search input changes, setting this field's value to `false` will prevent that and retain the options after the initial request.
-
-> Note that the fetched options are filtered with fuzzy search so the search input will affect the displayed options.
 
 <br/>
 
@@ -239,6 +232,68 @@ fetch_options: {
 ```
 </details>
 
+### `grouped_options` _object?_ <a name="grouped_options"></a>
+If you have data structure where there is a second level of option you have the option to group them together. A sample data structure:
+```js
+const data = [
+    {
+        label: 'Colors',
+        options: [
+            {
+                label: 'Red',
+                value: 'red'
+            },
+            // ...
+        ]
+    },
+    {
+        label: 'Flavors',
+        options: [
+            {
+                label: 'Salted Caramel',
+                value: 'salted-caramel'
+            }
+            // ...
+        ]
+    },
+    // ...
+]
+```
+
+##### `grouped_options.display_field` _string | default: "label"_ <a name="grouped_options__display_field"></a>
+
+Object key or path to object to be displayed.
+
+
+<br/>
+
+##### `grouped_options.value_field` _string | default: "value"_ <a name="grouped_options__value_field"></a>
+
+Object key or path to object to be saved.
+
+<br/>
+
+##### `grouped_options.data_path` _string_ <a name="grouped_options__data_path"></a>
+
+Object key or path to object to the array of objects to be used as options.
+
+<br/>
+
+### `refetch_url` _boolean | default: true_ <a name="refetch_url"></a>
+
+By default `react-select` will send a try to load new options through a new request whenever the search input changes, setting this field's value to `false` will prevent that and retain the options after the initial request.
+
+> Note that the fetched options are filtered with fuzzy search by default so the search input will affect the displayed options.
+
+<br/>
+
+### `fuzzy_search` _boolean | default: true_ <a name="fuzzy_search"></a>
+The widget uses `fuse.js` to search the provided options. But if you are using filtering the data on the API level you might not want to filter the result on client side too. _See [`fetch_options.params_function`](#fetch_options__params_function)_
+
+
+> Setting both `fuzzy_search` and `refetch_url` off will turn off input field search function.
+
+<br/>
 
 ## Authors
 
