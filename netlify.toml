@@ -3,6 +3,11 @@
   publish = "deploy"
 
 [[redirects]]
-  from = "/demo"
+  from = "/demo/*"
   to = "/#/collections/pages/entries/demo"
-  status = 200
+  status = 301
+
+[[redirects]]
+  from = "/docs"
+  to = "https://github.com/adamjkb/netlify-cms-widget-select-async#readme"
+  status = 301

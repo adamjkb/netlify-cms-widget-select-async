@@ -3,3 +3,6 @@ dist
 deploy
 *.log
 .idea
+
+# Local Netlify folder
+.netlify

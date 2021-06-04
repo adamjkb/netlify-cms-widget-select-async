@@ -1,16 +1,8 @@
----
-
-<p align="center">⚠️ Pre-release version, under development</p>
-
----
-
 # Async Select Widget for NetlifyCMS
 
 A select widget for [NetlifyCMS](https://www.netlifycms.org/) widget that allows you to select a string value or an array of strings. The options are populated through asynchronous fetch requests.
 
-`TODO: 'Checkout the demo' link`
-
-`TODO: Add screenshot`
+[Checkout the demo](https://async-select-widget.netlify.app/demo)
 
 ## Table of contents
  * [Features](#features)
