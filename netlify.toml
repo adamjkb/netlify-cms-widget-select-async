@@ -3,7 +3,7 @@
   publish = "deploy"
 
 [[redirects]]
-  from = "/demo/*"
+  from = "/demo"
   to = "/#/collections/pages/entries/demo"
   status = 301
 
