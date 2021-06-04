@@ -81,36 +81,34 @@ export default {
                                      *  @param {string} opts.method - Method | default: 'GET'
                                      *  @returns {Object} object of url and options
                                      */
-                                    // params_function: ({ term, url, ...rest }) =>
-                                    //     ({
-                                    //         url,
-                                    //         options: {
-                                    //             ...rest,
-                                    //             body: JSON.stringify({
-                                    //                 query: `
-                                    //                     query allProducts {
-                                    //                         products(first: 100) {
-                                    //                         edges {
-                                    //                             node {
-                                    //                                 label: title
-                                    //                                 value: id
-                                    //                                 options: variants(first: 20) {
-                                    //                                     edges {
-                                    //                                         node {
-                                    //                                             id
-                                    //                                             title
-                                    //                                         }
-                                    //                                     }
-                                    //                                 }
-                                    //                             }
-                                    //                         }
-                                    //                         }
-                                    //                     }
-                                    //                 `,
-                                    //                 variables: {}
-                                    //             })
-                                    //         }
-                                    //     }) // returns a fetch object
+                                    params_function: ({ term, url, ...rest }) => ({
+                                        url,
+                                        options: {
+                                            ...rest,
+                                            body: JSON.stringify({
+                                                query: `
+                                                    query allProducts(
+                                                        $myCustomQuery: String
+                                                    ) {
+                                                        products(
+                                                            first: 15
+                                                            query: $myCustomQuery
+                                                        ) {
+                                                            edges {
+                                                                node {
+                                                                    label: title
+                                                                    value: id
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                `,
+                                                variables: {
+                                                    'myCustomQuery': `title:${term}*`
+                                                }
+                                            })
+                                        }
+                                    })
                                 }
                             }
                         ]

@@ -37,7 +37,7 @@ A select widget for [NetlifyCMS](https://www.netlifycms.org/) widget that allows
 ```bash
 npm install @adamjkb/netlify-cms-widget-async
 ```
-> You may install it through native Javascript `import` through CDNs such as [Skypack](https://www.skypack.dev/)
+> You may install it through native JavaScript `import` through CDNs such as [Skypack](https://www.skypack.dev/)
 ```js
 import { Widget as AsyncSelectWidget } from '@adamjkb/netlify-cms-widget-async'
 CMS.registerWidget(AsyncSelectWidget)
@@ -94,7 +94,7 @@ fields:
 
 ```
 ## Options
-#### `url` _string_ <a name="url"></a>
+### `url` _string_ <a name="url"></a>
 
 Endpoint URL
 
@@ -102,7 +102,7 @@ _Example: https://fakestoreapi.com/products_
 
 <br/>
 
-#### `display_field` _string | default: "label"_ <a name="display_field"></a>
+### `display_field` _string | default: "label"_ <a name="display_field"></a>
 
 Object key or path to object to be displayed.
 
@@ -110,7 +110,7 @@ _Example: `node.label` or `title`_
 
 <br/>
 
-#### `value_field` _string | default: "value"_ <a name="value_field"></a>
+### `value_field` _string | default: "value"_ <a name="value_field"></a>
 
 Object key or path to object to be saved.
 
@@ -118,7 +118,7 @@ _Example: `node.value` or `id`_
 
 <br/>
 
-#### `data_path` _string?_ <a name="data_path"></a>
+### `data_path` _string?_ <a name="data_path"></a>
 
 Object key or path to object to the array of objects to be used as options.
 
@@ -128,24 +128,114 @@ _Example: `data.products.edges` or `data`_
 
 <br/>
 
-#### `multiple` _boolean | default: false_ <a name="multiple"></a>
+### `multiple` _boolean | default: false_ <a name="multiple"></a>
 
 Allows multiple options to be selected. Widget's output value is going to change to an `string[]`
 
 <br/>
 
-#### `min` and `max` _integer?_ <a name="min"></a><a name="max"></a>
+### `min` and `max` _integer?_ <a name="min"></a><a name="max"></a>
 
-minimum and maximum number of items allowed to be selected
+Minimum and maximum number of items allowed to be selected
 > ignored if [`multiple`](#multiple) is false
 
 <br/>
 
-#### `refetch_url` _boolean | default: true_ <a name="refetch_url"></a>
+### `refetch_url` _boolean | default: true_ <a name="refetch_url"></a>
 
 By default `react-select` will send a try to load new options through a new request whenever the search input changes, setting this field's value to `false` will prevent that and retain the options after the initial request.
 
 > Note that the fetched options are filtered with fuzzy search so the search input will affect the displayed options.
+
+<br/>
+
+### `fetch_options` _object?_ <a name="fetch_options"></a>
+
+The properties of this field are mapping to the main values of native `fetch()` request parameters. [`fetch()` documentation on MDN](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#syntax)
+
+> If you need to set parameters outside of the built-in `method`,`headers`, and `body` you can do so with by extending the passed in parameters using the [`fethc_options.params_function`](#fetch_options__params_function)
+
+
+##### `fetch_options.method` _string | default: "GET"_ <a name="fetch_options__get"></a>
+
+Request method.
+
+
+##### `fetch_options.headers` _object | default: {}_ <a name="fetch_options__headers"></a>
+
+Request headers.
+
+_Example:_
+
+```yml
+fetch_options:
+    headers:
+        Content-Type: application/json
+        X-Access-Token: <PUBLIC-API-KEY>
+```
+
+
+##### `fetch_options.body` _string | default: undefined_ <a name="fetch_options__body"></a>
+
+Request body.
+
+_Note that GET methods does not have a body. [Change request method](#fetch_options__method) if you are specifying this field._
+
+##### `fetch_options.params_function` _function?_ <a name="fetch_options__params_function"></a>
+
+> ⚠️ Only works if you are using a JavaScript config file to initialize NetlifyCMS. Refer to [documentation](https://www.netlifycms.org/docs/beta-features/#manual-initialization) how to set that up. 
+
+A JavaScript function that receives all all the other `fetch_options` values, the `url`, and the search input term. Must return a valid object with at least a url property.
+
+```js
+function({term, url, method, headers, body}) {
+    // ...
+    return {
+        url, // required
+        options: {method, headers, body} // optional
+    }
+}
+```
+
+<details>
+<summary>Example config using a GraphQL query with variables:</summary>
+
+```js
+fetch_options: {
+    // ...
+    params_function: ({ term, url, ...rest }) => ({
+        url,
+        options: {
+            ...rest,
+            body: JSON.stringify({
+                query: `
+                    query allProducts(
+                        $myCustomQuery: String
+                    ) {
+                        products(
+                            first: 15
+                            query: $myCustomQuery
+                        ) {
+                            edges {
+                                node {
+                                    label: title
+                                    value: id
+                                }
+                            }
+                        }
+                    }
+                `,
+                variables: {
+                    'myCustomQuery': `title:${term}*`
+                }
+            })
+        }
+    })    
+}
+
+```
+</details>
+
 
 ## Authors
 
