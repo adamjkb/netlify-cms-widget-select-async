@@ -1,13 +1,10 @@
 export default {
     config: {
-        backend: import.meta.env.DEV ? {
-            name: 'git-gateway',
-            branch:'main'
-        } : {
+        backend: {
             name: 'test-repo'
         },
         load_config_file: false,
-        local_backend: import.meta.env.DEV,
+        local_backend: import.meta.env.MODE !== 'deployment',
         media_folder: '/example/assets/images/',
         label: 'Pages',
         name: 'pages',
@@ -28,7 +25,7 @@ export default {
                         label           :'Demo',
                         name            :'demo',
                         delete          :false,
-                        file            :'example/data/example.json',
+                        file            :'dev/data/example.json',
                         extension       :'json',
                         fields: [
                             {

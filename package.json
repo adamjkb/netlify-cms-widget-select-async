@@ -19,11 +19,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "example": "run-p start:cms-proxy dev",
     "build": "vite build --emptyOutDir",
     "deployment": "vite build --mode deployment",
-    "serve": "vite preview",
-    "start:cms-proxy": "npx netlify-cms-proxy-server"
+    "serve": "vite preview"
   },
   "keywords": [
     "netlify",

@@ -1,7 +1,7 @@
 export default ({ mode }) => {
     if (mode !== 'deployment') {
         return {
-            root: './example',
+            root: './dev',
             build: {
                 minify: 'terser',
                 lib: {
@@ -15,7 +15,7 @@ export default ({ mode }) => {
         }
     } else {
         return {
-            root: './example',
+            root: './dev',
             build: {
                 minify: 'terser',
                 outDir: '../deploy',
