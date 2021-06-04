@@ -56,7 +56,7 @@ CMS.registerWidget(AsyncSelectWidget)
 
 
 ### Simple usage
-Add to your NetlifyCMS collection:
+Add to your [NetlifyCMS collection](https://www.netlifycms.org/docs/configuration-options/#collections):
 ```yml
 fields:
   - name: simple_usage
@@ -69,7 +69,7 @@ fields:
 
 ```
 ### Advanced usage
-Add to your NetlifyCMS collection:
+Add to your [NetlifyCMS collection](https://www.netlifycms.org/docs/configuration-options/#collections):
 ```yml
 fields:
   - name: advanced_usage
@@ -80,11 +80,14 @@ fields:
     value_field: node.value
     display_field: node.label
     data_path: data.products.edges
-    multiple: true
     grouped_options:
         data_path: node.options.edges
         value_field: node.id
         display_field: node.title
+    multiple: true
+    min: 1
+    max: 4
+    refetch_url: false
     fetch_options:
         headers:
             Content-Type: application/json
@@ -183,7 +186,7 @@ _Note that GET methods does not have a body. [Change request method](#fetch_opti
 
 ##### `fetch_options.params_function` _function?_ <a name="fetch_options__params_function"></a>
 
-> ⚠️ Only works if you are using a JavaScript config file to initialize NetlifyCMS. Refer to [documentation](https://www.netlifycms.org/docs/beta-features/#manual-initialization) how to set that up. 
+> ⚠️ Only works if you are using a JavaScript config file to initialize NetlifyCMS. Refer to [documentation](https://www.netlifycms.org/docs/beta-features/#manual-initialization) how to set that up.
 
 A JavaScript function that receives all all the other `fetch_options` values, the `url`, and the search input term. Must return a valid object with at least a url property.
 
