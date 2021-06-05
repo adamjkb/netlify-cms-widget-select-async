@@ -3,6 +3,7 @@
 A select widget for [NetlifyCMS](https://www.netlifycms.org/) widget that allows you to select a string value or an array of strings. The options are populated through asynchronous fetch requests.
 
 [Checkout the demo](https://async-select-widget.netlify.app/demo)
+or [try it out in a sandbox](https://stackblitz.com/edit/netlify-cms-widget-select-async?file=public%2Fconfig.yml)
 
 ## Table of contents
  * [Features](#features)
