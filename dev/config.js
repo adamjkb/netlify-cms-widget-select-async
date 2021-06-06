@@ -1,6 +1,9 @@
 export default {
     config: {
-        backend: {
+        backend: import.meta.env.MODE !== 'deployment' ? {
+            name: 'git-gateway',
+            branch:'main'
+        } : {
             name: 'test-repo'
         },
         load_config_file: false,
@@ -117,5 +120,5 @@ export default {
                 ]
             }
         ]
-    },
+    }
 }

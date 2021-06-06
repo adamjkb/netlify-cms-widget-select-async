@@ -2,49 +2,76 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import AsyncSelect from 'react-select/async'
-import { get, find, debounce } from 'lodash'
-import { List, Map, fromJS } from 'immutable'
+import debounce from 'lodash/debounce'
 import { reactSelectStyles } from 'netlify-cms-ui-default/dist/esm/styles'
 import { validations } from 'netlify-cms-lib-widgets'
 import Fuse from 'fuse.js'
-
+import dlv from 'dlv'
 import { formatGroupLabel } from './styles.jsx'
+import { getOptionsFromInitialValue, optionToString } from './utils'
+
+
+const fieldDefaults = {
+    value_field: 'value',
+    label_field: 'label',
+    multiple: false,
+    required: true,
+    refetch_url: true,
+    fuzzy_search: true,
+    grouped_options: {
+        flatten_singles: true
+    },
+    fetch_options: {
+        headers: {},
+        method: 'GET',
+        body: undefined
+    }
+}
 
 export class Control extends React.Component {
 
     constructor(props) {
         super(props)
         this.fuse = null
+        this.count = 0
 
         this.state = {
             allOptions: null,
+            selectedOptions: null,
+            initialOptionsLoaded: false
         }
 
         this.loadOptions = debounce(this.loadOptions.bind(this), 100, { leading: true, trailing:true, maxWait: 300 })
         this.fetchUrl = this.fetchUrl.bind(this)
         this.handleChange = this.handleChange.bind(this)
         this.fuzzySearch = this.fuzzySearch.bind(this)
-        this.getFieldValues = this.getFieldValues.bind(this)
-        this.processRawOption = this.processRawOption.bind(this)
+        this.getCMSValues = this.getCMSValues.bind(this)
+        this.processRawData = this.processRawData.bind(this)
         this.getOptions = this.getOptions.bind(this)
     }
 
-    handleChange(selectedOption) {
+    handleChange(selectedOptions) {
         const { onChange, field } = this.props
         const isMultiple = field.get('multiple', fieldDefaults.multiple)
-        const isEmpty = isMultiple ? !selectedOption?.length : !selectedOption
+        const isEmpty = isMultiple ? !selectedOptions.length : !selectedOptions
 
         if (field.get('required') && isEmpty && isMultiple) {
-            onChange(List())
+            onChange([])
         } else if (isEmpty) {
             onChange(null)
         } else if (isMultiple) {
-            const options = selectedOption.map(optionToString)
-            onChange(fromJS(options))
+            const options = selectedOptions.map(optionToString)
+            onChange(options)
         } else {
-            onChange(optionToString(selectedOption))
+            onChange(optionToString(selectedOptions))
         }
+
+        // push new selectedoptions to state, Component is controlled by this state
+        this.setState({
+            selectedOptions
+        })
     }
+
     isValid() {
         const { field, value, t } = this.props
         const min = field.get('min')
@@ -65,11 +92,7 @@ export class Control extends React.Component {
 
     }
 
-
-    /**
-     * Get field values
-     */
-    getFieldValues() {
+    getCMSValues() {
         const { field } = this.props
 
         // Data options
@@ -81,7 +104,8 @@ export class Control extends React.Component {
         const isGroupedOptions = !!field.get('grouped_options')
         const groupedValueField = field.getIn(['grouped_options', 'value_field'], fieldDefaults.value_field)
         const groupedDisplayField = field.getIn(['grouped_options', 'display_field'], fieldDefaults.display_field)
-        const groupedDataPath = field.getIn(['grouped_options', 'data_path'], )
+        const groupedDataPath = field.getIn(['grouped_options', 'data_path'])
+        const groupedFlattenSingles = field.getIn(['grouped_options', 'flatten_singles'], fieldDefaults.grouped_options.flatten_singles)
 
         // Fetch options
         const url = field.get('url')
@@ -100,6 +124,7 @@ export class Control extends React.Component {
             fuzzySearch,
             groupedDataPath,
             groupedDisplayField,
+            groupedFlattenSingles,
             groupedValueField,
             headers,
             isGroupedOptions,
@@ -116,7 +141,7 @@ export class Control extends React.Component {
         const {
             isGroupedOptions
 
-        } = this.getFieldValues()
+        } = this.getCMSValues()
 
         if (this.fuse) {
             const results = this.fuse.search(term)
@@ -154,8 +179,7 @@ export class Control extends React.Component {
             headers,
             body,
             paramsFunction,
-            dataPath,
-        } = this.getFieldValues()
+        } = this.getCMSValues()
 
 
         /**
@@ -192,97 +216,110 @@ export class Control extends React.Component {
             }
         }
 
-        /**
-         * f
-         */
         try {
             const res = await fetch(fetchParams.url, fetchParams.options)
-                .then(data => data.json())
-                .then(json => fromJS(json))
-                .then(jsObject => dataPath ? jsObject.getIn(dataPath.split('.')) : jsObject) // drill JSON if selected
+            const data = await res.json()
 
-            return res
+            return data
         } catch (e) {
             console.log(e)
         }
     }
 
-    processRawOption(rawOptions){
+    processRawData(rawData){
         const {
+            dataPath,
             valueField,
             displayField,
             isGroupedOptions,
             groupedValueField,
             groupedDisplayField,
             groupedDataPath,
-        } = this.getFieldValues()
+            groupedFlattenSingles
+        } = this.getCMSValues()
 
-        let processedOptions
+        const flatLabel = (parentLabel, childLabel) => `${parentLabel}: ${childLabel}`
 
-        if (isGroupedOptions) {
-            processedOptions = rawOptions.map(entry => ({
-                label: entry.getIn(displayField.split('.')),
-                ...(
-                    // add options object key if size is greater than 1
-                    entry.hasIn(groupedDataPath.split('.')) && entry.getIn(groupedDataPath.split('.')).count() > 1 ?
-                        {
-                            options: entry.getIn(groupedDataPath.split('.')).map(optionsEntry => {
-                                return {
-                                    value: optionsEntry.getIn(groupedValueField.split('.')),
-                                    label: optionsEntry.getIn(groupedDisplayField.split('.')),
-                                    groupData: optionsEntry
-                                }
-                            })
-                        }
-                    // Otherwise merge the label with its parent's label
-                        :
-                        {
-                            value: entry.getIn([...groupedDataPath.split('.'), 0,...groupedValueField.split('.')]),
-                            label: entry.getIn(displayField.split('.')) + /* Seperator */': ' + entry.getIn([...groupedDataPath.split('.'), 0,...groupedDisplayField.split('.')]),
-                            groupData: entry.getIn([...groupedDataPath.split('.'), 0])
-                        }
+        const structure = {
+            groupedSingle: (parent, option = []) => ({
+                'label': flatLabel(
+                    dlv(parent, displayField), // parent label
+                    dlv(option, groupedDisplayField) // child label
                 ),
-                // If groupedDataPath retrieves no result fallback to parents value
-                ...(
-                    !entry.hasIn(groupedDataPath.split('.')) &&
-                    {
-                        value: entry.getIn(valueField.split('.'))
-                    }
-                ),
-                data: entry
-            }))
-            processedOptions = processedOptions
-                .toArray()
-                .map(item => ({
-                    ...item,
-                    ...(item.options && {
-                        options: item.options.toArray()
-                    })
-
+                'value': dlv(option, groupedValueField),
+                '__dataGroup': option
+            }),
+            groupedMulti: (parent, options) => ({
+                'label': dlv(parent, displayField),
+                'options': options.map(itm => ({
+                    'label': dlv(itm, groupedDisplayField),
+                    'value': dlv(itm, groupedValueField),
+                    '__dataGroup': itm
                 }))
-
-        } else {
-            processedOptions = rawOptions.map(entry => ({
-                value: entry.getIn(valueField.split('.')),
-                label: entry.getIn(displayField.split('.')),
-                data: entry,
-            })).toArray()
+            }),
+            single: (option) => ({
+                'label': dlv(option, displayField),
+                'value': dlv(option, valueField),
+                '__data': option
+            })
         }
-        return processedOptions
+
+        const rawOptions = dataPath ? dlv(rawData, dataPath) : rawData
+
+        if (rawOptions) {
+            const processedOptions = rawOptions.map(item => {
+                const group = isGroupedOptions && dlv(item, groupedDataPath) // check for grouped data
+
+                if (group && group.length) { // Construct grouped options
+                    if (groupedFlattenSingles && group.length === 1) { // flatten single options to top level option
+                        return structure.groupedSingle(item, group[0])
+                    } else { // group options
+                        return structure.groupedMulti(item, group)
+                    }
+                }
+                // Treat single option
+                return structure.single(item)
+            })
+
+            return processedOptions
+        }
+
     }
 
     async getOptions(term) {
-        const { refetchUrl, fuzzySearch } = this.getFieldValues()
+        const { refetchUrl, fuzzySearch } = this.getCMSValues()
 
         // no options in-state or refetch url with each term
         if (!this.state.allOptions || refetchUrl) {
             // fetch options
-            const rawOptions = await this.fetchUrl({ term })
+            const rawData = await this.fetchUrl({ term })
 
             // process options -> store in state
             await this.setState({
-                allOptions: this.processRawOption(rawOptions)
+                allOptions: this.processRawData(rawData)
             })
+        }
+
+
+        // if there is not selected value but we have a value and it is the initial load then set selectedValues state
+        if (
+            this.props.value &&
+            !this.initialOptionsLoaded &&
+            !this.selectedOptions
+        ) {
+            const { field, value } = this.props
+            const enrichedValues = getOptionsFromInitialValue({
+                options: this.state.allOptions,
+                isMultiple: field.get('multiple', fieldDefaults.multiple),
+                value
+            })
+
+            if (enrichedValues) {
+                this.setState({
+                    selectedOptions: enrichedValues,
+                    initialOptionsLoaded: true
+                })
+            }
         }
 
         if (term && fuzzySearch) {
@@ -299,7 +336,6 @@ export class Control extends React.Component {
 
     render() {
         const {
-            value,
             field,
             forID,
             classNameWrapper,
@@ -310,12 +346,6 @@ export class Control extends React.Component {
         const isMultiple = field.get('multiple', fieldDefaults.multiple)
         const isClearable = !field.get('required', fieldDefaults.required) || isMultiple
         const isSearchable = !(!field.get('fuzzy_search', fieldDefaults.fuzzy_search) && !field.get('refetch_url', fieldDefaults.refetch_url))
-
-        const selectedValue = getSelectedValue({
-            options: this.state.allOptions,
-            value,
-            isMultiple,
-        })
 
         return (
             <AsyncSelect
@@ -331,7 +361,7 @@ export class Control extends React.Component {
                 onBlur={setInactiveStyle}
                 onFocus={setActiveStyle}
                 placeholder=""
-                value={selectedValue}
+                value={this.state.selectedOptions}
                 styles={reactSelectStyles}
             />
         )
@@ -350,82 +380,4 @@ Control.propTypes = {
     setInactiveStyle: PropTypes.func.isRequired,
     hasActiveStyle: PropTypes.func,
     t: PropTypes.func,
-}
-
-
-const fieldDefaults = {
-    value_field: 'value',
-    label_field: 'label',
-    multiple: false,
-    required: true,
-    refetch_url: true,
-    fuzzy_search: true,
-    fetch_options: {
-        headers: {},
-        method: 'GET',
-        body: undefined
-    }
-}
-
-
-function optionToString(option) {
-    return option && option.value ? option.value : ''
-}
-
-function getSelectedValue({ value, options, isMultiple }) {
-    if (!options) return
-
-    if (isMultiple) {
-        const selectedOptions = List.isList(value) ? value.toJS() : value
-
-        if (!selectedOptions || !Array.isArray(selectedOptions)) {
-            return null
-        }
-
-        let selectedValues = []
-        selectedOptions.forEach(value => {
-            const result = options.find(o => o.value === value)
-            if (result) {
-                selectedValues.push(result)
-                return
-            }
-            options.some(({options: nestedOptions, label}) => {
-                if (!nestedOptions) return
-                const result = find(nestedOptions, ['value', value])
-                if (result) {
-                    const formatedResult = {
-                        ...result,
-                        label: label + ': ' + (result.label || result.value)
-                    }
-                    selectedValues.push(formatedResult)
-                    return true
-                }
-            })
-        })
-
-        if (selectedValues) {
-            return selectedValues
-        }
-
-    } else {
-        let selectedValue = find(options, ['value', value])
-
-        if (selectedValue) return selectedValue
-
-        // dig deeper
-        options.some(({ options: nestedOptions }, item) => {
-            if (!nestedOptions) return
-            const result = find(nestedOptions, ['value', value])
-            if (result) {
-                selectedValue = result
-                return true // break loop
-            }
-        })
-
-        if (selectedValue) {
-            return selectedValue
-        } else {
-            return null
-        }
-    }
 }

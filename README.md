@@ -272,6 +272,13 @@ Object key or path to object to the array of objects to be used as options.
 
 <br/>
 
+##### `grouped_options.flatten_singles` _boolean | default: true_ <a name="grouped_options__flatten_singles"></a>
+
+If true, grouped options that contain only one option will be transformed into a top level options. Its label will be formatted as such `{parent.label}: {child.label}`.
+
+
+<br/>
+
 ### `refetch_url` _boolean | default: true_ <a name="refetch_url"></a>
 
 By default `react-select` will send a try to load new options through a new request whenever the search input changes, setting this field's value to `false` will prevent that and retain the options after the initial request.
