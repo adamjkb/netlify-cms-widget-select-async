@@ -28,11 +28,11 @@ or [try it out in a sandbox](https://stackblitz.com/edit/netlify-cms-widget-sele
 ## Install
 #### Via NPM:
 ```bash
-npm install @adamjkb/netlify-cms-widget-async
+npm install @adamjkb/netlify-cms-widget-select-async
 ```
 > You may install it through native JavaScript `import` through CDNs such as [Skypack](https://www.skypack.dev/)
 ```js
-import { Widget as AsyncSelectWidget } from '@adamjkb/netlify-cms-widget-async'
+import { Widget as AsyncSelectWidget } from '@adamjkb/netlify-cms-widget-select-async'
 CMS.registerWidget(AsyncSelectWidget)
 ```
 
